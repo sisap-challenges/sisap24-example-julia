@@ -51,7 +51,7 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - name: Run benchmark
         env:
-          DBSIZE=300K
+          DBSIZE: 300K
         run: |
           mkdir data2024
           cd data2024
@@ -59,6 +59,7 @@ jobs:
           curl -O http://ingeotec.mx/~sadit/sisap2024-data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5  # this url will be updated soon
           curl -O http://ingeotec.mx/~sadit/sisap2024-data/gold-standard-dbsize=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n=10k.h5 # this url will be updated soon
           cd ..
+          julia --project=. -e 'using Pkg; Pkg.instantiate()'
           julia --project=. -t auto task1.jl $DBSIZE
           julia --project=. -t auto task3.jl $DBSIZE
           julia --project=. eval.jl
