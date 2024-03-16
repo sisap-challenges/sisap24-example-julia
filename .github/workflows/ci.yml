@@ -47,14 +47,14 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
-      - name: Cache Primes
+      - name: Cache database and queries
         id: cache-data2024
         uses: actions/cache@v4
         with:
             path: data2024/**.h5
             key: data2024
 
-      - name: Generate Prime Numbers
+      - name: Download database and queries
         if: steps.cache-data2024.outputs.cache-hit != 'true'
         run: |
             mkdir data2024
@@ -70,7 +70,7 @@ jobs:
         run: |
           pwd
           ls -l
-          JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia -e 'using Pkg; Pkg.develop("https://github.com/sadit/SurrogatedDistanceModels.jl#main"); Pkg.instantiate()'
+          JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia -e 'using Pkg; Pkg.develop(url="https://github.com/sadit/SurrogatedDistanceModels.jl#main"); Pkg.instantiate()'
           JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia task1.jl $DBSIZE
           JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia task3.jl $DBSIZE
           JULIA_PROJECT=. julia eval.jl
