@@ -35,7 +35,7 @@ jobs:
           arch: ${{ matrix.arch }}
       - name: Install dependencies
         run: |
-          sudo apt-get install libcurl4-openssl-dev
+          sudo apt-get install curl libcurl4-openssl-dev
       - uses: actions/cache@v3
         env:
           cache-name: cache-artifacts
@@ -50,6 +50,8 @@ jobs:
       - name: Run benchmark
         env:
           DBSIZE: 300K
+          JULIA_PROJECT: .
+          JULIA_NUM_THREADS: auto
         run: |
           mkdir data2024
           cd data2024
