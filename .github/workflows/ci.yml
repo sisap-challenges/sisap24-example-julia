@@ -55,8 +55,8 @@ jobs:
             key: data2024
 
       - name: Generate Prime Numbers
-          if: steps.cache-data2024.outputs.cache-hit != 'true'
-          run: |
+        if: steps.cache-data2024.outputs.cache-hit != 'true'
+        run: |
             mkdir data2024
             cd data2024
             curl -O https://sisap-23-challenge.s3.amazonaws.com/SISAP23-Challenge/laion2B-en-clip768v2-n=$DBSIZE.h5
