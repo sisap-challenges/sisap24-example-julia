@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get install curl libcurl4-openssl-dev
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         env:
           cache-name: cache-artifacts
         with:
@@ -50,8 +50,6 @@ jobs:
       - name: Run benchmark
         env:
           DBSIZE: 300K
-          JULIA_PROJECT: .
-          JULIA_NUM_THREADS: auto
         run: |
           mkdir data2024
           cd data2024
@@ -59,6 +57,8 @@ jobs:
           curl -O http://ingeotec.mx/~sadit/sisap2024-data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5  # this url will be updated soon
           curl -O http://ingeotec.mx/~sadit/sisap2024-data/gold-standard-dbsize=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n=10k.h5 # this url will be updated soon
           cd ..
+          pwd
+          ls -l
           julia --project=. -e 'using Pkg; Pkg.instantiate()'
           julia --project=. -t auto task1.jl $DBSIZE
           julia --project=. -t auto task3.jl $DBSIZE
