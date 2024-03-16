@@ -33,7 +33,7 @@ if !isinteractive()
 
             p = lineplot(D.recall; ylim=(0, 1), title=String(D.algo[1]), ylabel="recall", xlabel="$(D.params[1]) ... $(D.params[end])")
             display(p)
-            show(f, "text/plain", string(p; colors=false))
+            show(f, "text/plain", string(p; color=false))
             CSV.write("$task-$dbsize.csv", D)
         end
     end
