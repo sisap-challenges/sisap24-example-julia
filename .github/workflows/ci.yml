@@ -33,6 +33,7 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
+      - uses: julia-actions/cache@v1
       - name: Install dependencies
         run: |
           sudo apt-get install curl libcurl4-openssl-dev
