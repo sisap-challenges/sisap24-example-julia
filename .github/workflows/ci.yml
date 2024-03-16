@@ -59,10 +59,10 @@ jobs:
           cd ..
           pwd
           ls -l
-          julia --project=. -e 'using Pkg; Pkg.instantiate()'
-          julia --project=. -t auto task1.jl $DBSIZE
-          julia --project=. -t auto task3.jl $DBSIZE
-          julia --project=. eval.jl
+          JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia -e 'using Pkg; Pkg.instantiate()'
+          JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia task1.jl $DBSIZE
+          JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia task3.jl $DBSIZE
+          JULIA_PROJECT=. julia eval.jl
       - uses: actions/upload-artifact@v4
         with:
           name: Results
