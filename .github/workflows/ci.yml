@@ -56,6 +56,8 @@ jobs:
 
       - name: Download database and queries
         if: steps.cache-data2024.outputs.cache-hit != 'true'
+        env:
+          DBSIZE: 300K
         run: |
             mkdir data2024
             cd data2024
