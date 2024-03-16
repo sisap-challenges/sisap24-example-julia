@@ -47,17 +47,27 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
+      - name: Cache Primes
+        id: cache-data2024
+        uses: actions/cache@v4
+        with:
+            path: data2024/**.h5
+            key: data2024
+
+      - name: Generate Prime Numbers
+          if: steps.cache-data2024.outputs.cache-hit != 'true'
+          run: |
+            mkdir data2024
+            cd data2024
+            curl -O https://sisap-23-challenge.s3.amazonaws.com/SISAP23-Challenge/laion2B-en-clip768v2-n=$DBSIZE.h5
+            curl -O http://ingeotec.mx/~sadit/sisap2024-data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5  # this url will be updated soon
+            curl -O http://ingeotec.mx/~sadit/sisap2024-data/gold-standard-dbsize=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n=10k.h5 # this url will be updated soon
+
       - uses: julia-actions/julia-buildpkg@v1
       - name: Run benchmark
         env:
           DBSIZE: 300K
         run: |
-          mkdir data2024
-          cd data2024
-          curl -O https://sisap-23-challenge.s3.amazonaws.com/SISAP23-Challenge/laion2B-en-clip768v2-n=$DBSIZE.h5
-          curl -O http://ingeotec.mx/~sadit/sisap2024-data/public-queries-2024-laion2B-en-clip768v2-n=10k.h5  # this url will be updated soon
-          curl -O http://ingeotec.mx/~sadit/sisap2024-data/gold-standard-dbsize=$DBSIZE--public-queries-2024-laion2B-en-clip768v2-n=10k.h5 # this url will be updated soon
-          cd ..
           pwd
           ls -l
           JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia -e 'using Pkg; Pkg.develop("https://github.com/sadit/SurrogatedDistanceModels.jl#main"); Pkg.instantiate()'
