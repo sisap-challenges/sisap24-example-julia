@@ -1,4 +1,4 @@
-using JLD2, SimilaritySearch, DataFrames, CSV, Glob
+using JLD2, SimilaritySearch, DataFrames, CSV, Glob, UnicodePlots
 
 function evaluate_results(gfile, resultfiles, k)
     gold_knns = jldopen(f->f["knns"][1:k, :], gfile)
@@ -19,14 +19,22 @@ end
 if !isinteractive()
     goldsuffix = "public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
     k = 30
-    for path in glob("results-task?/*")
-        task, dbsize = splitpath(path)
-        lastpath = glob(joinpath(path, "*")) |> sort! |> last
-        gfile = joinpath("data2024", "gold-standard-dbsize=$dbsize--$goldsuffix")
-        files = glob(joinpath(lastpath, "*.h5"))
-        D = evaluate_results(gfile, files, k)
-        display(gfile => files)
-        display(D)
-        CSV.write("$task-$dbsize.csv", D)
+    open("results-summary.txt", "w") do f
+        for path in glob("results-task?/*")
+            task, dbsize = splitpath(path)
+            lastpath = glob(joinpath(path, "*")) |> sort! |> last
+            gfile = joinpath("data2024", "gold-standard-dbsize=$dbsize--$goldsuffix")
+            files = glob(joinpath(lastpath, "*.h5"))
+            D = evaluate_results(gfile, files, k)
+            show(f, "text/plain", gfile => files)
+            show(f, "text/plain", D)
+            display(gfile => files)
+            display(D)
+
+            p = lineplot(D.recall; ylim=(0, 1), title=String(D.algo[1]), ylabel="recall", xlabel="$(D.params[1]) ... $(D.params[end])")
+            display(p)
+            show(f, "text/plain", string(p; colors=false))
+            CSV.write("$task-$dbsize.csv", D)
+        end
     end
 end

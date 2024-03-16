@@ -73,7 +73,7 @@ jobs:
           pwd
           ls -l 
           ls -l data2024
-          JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia -e 'using Pkg; Pkg.develop(url="https://github.com/sadit/SurrogatedDistanceModels.jl#main"); Pkg.instantiate()'
+          JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia -e 'using Pkg; Pkg.instantiate()'
           JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia task1.jl $DBSIZE
           JULIA_PROJECT=. JULIA_NUM_THREADS=auto julia task3.jl $DBSIZE
           JULIA_PROJECT=. julia eval.jl
@@ -82,3 +82,4 @@ jobs:
           name: Results
           path: | 
             results-task*.csv
+            results-summary.txt
