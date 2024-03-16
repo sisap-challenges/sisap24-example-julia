@@ -29,14 +29,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'true'
-      - uses: actions/setup-python@v4   
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - name: Install dependencies
         run: |
-          pip install matplotlib h5py
           apt install curl
       - uses: actions/cache@v3
         env:
@@ -63,11 +61,8 @@ jobs:
           julia --project=. -t auto task1.jl $DBSIZE
           julia --project=. -t auto task3.jl $DBSIZE
           julia --project=. eval.jl
-          #python3 eval/eval.py
-          #python3 eval/plot.py res.csv
-          ## python3 eval/plot.py res.csv --size 300K
       - uses: actions/upload-artifact@v4
         with:
           name: Results
           path: | 
-            results-task1*.csv
+            results-task*.csv
