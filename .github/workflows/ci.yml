@@ -35,7 +35,7 @@ jobs:
           arch: ${{ matrix.arch }}
       - name: Install dependencies
         run: |
-          apt install curl
+          apt-get install curl
       - uses: actions/cache@v3
         env:
           cache-name: cache-artifacts
