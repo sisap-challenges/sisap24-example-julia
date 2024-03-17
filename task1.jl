@@ -75,9 +75,11 @@ function task1(;
 end
 
 if !isinteractive()
-    if length(ARGS) != 1 || ARGS[1] ∉ ("300K", "10M", "100M")
+    if length(ARGS) == 0 || !all(dbsize -> dbsize ∉ ("300K", "10M", "100M"), ARGS)
         throw(ArgumentError("this script must be called with one of the following arguments: 300K, 10M or 100M"))
     end
 
-    task1(dbsize=ARGS[1])
+    for dbsize in ARGS
+        task1(; dbsize)
+    end
 end
