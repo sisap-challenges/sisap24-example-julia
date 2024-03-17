@@ -2,13 +2,13 @@ using JLD2, SimilaritySearch, DataFrames, CSV, Glob, UnicodePlots
 
 function evaluate_results(gfile, resultfiles, k)
     gold_knns = jldopen(f->f["knns"][1:k, :], gfile)
-    res = DataFrame(size=[], algo=[], buildtime=[], querytime=[], params=[], recall=[])
+    res = DataFrame(size=[], algo=[], preprocessingtime=[], buildtime=[], querytime=[], params=[], recall=[])
     for resfile in resultfiles
         @info resfile
         reg = jldopen(resfile) do f
             knns = f["knns"][1:k, :]
             recall = macrorecall(gold_knns, knns)
-            push!(res, (f["size"], f["algo"], f["buildtime"], f["querytime"], f["params"], recall))
+            push!(res, (f["size"], f["algo"], f["preprocessingtime"], f["buildtime"], f["querytime"], f["params"], recall))
         end
 
     end
@@ -26,7 +26,7 @@ if !isinteractive()
             gfile = joinpath("data2024", "gold-standard-dbsize=$dbsize--$goldsuffix")
             files = glob(joinpath(lastpath, "*.h5"))
             D = evaluate_results(gfile, files, k)
-            println(f, "=== results for $dbsize $goldsuffix ===")
+            println(f, "\n\n=== results for $dbsize $goldsuffix ===")
             println(f, gfile => files)
             show(f, "text/plain", gfile => files); println()
             show(f, "text/plain", D); println()
