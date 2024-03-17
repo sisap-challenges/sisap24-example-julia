@@ -1,4 +1,4 @@
-using SimilaritySearch, JLD2, CSV, Glob, LinearAlgebra, Dates
+using SimilaritySearch, SurrogatedDistanceModels, JLD2, CSV, Glob, LinearAlgebra, Dates
 
 include("common.jl")
 
