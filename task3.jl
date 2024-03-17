@@ -46,6 +46,7 @@ function task3(;
     @info "indexing, this can take a while!"
     G, meta = build_searchgraph(dist_proj, db)
     meta["size"] = dbsize
+    meta["preprocessingtime"] = preprocessingtime
     meta["params"] = "$(meta["params"]) $nick"
     resfile = joinpath(outdir, "searchgraph-$nick-k=$k")
     run_search_task3(G, queries, k, meta, resfile)
@@ -54,9 +55,11 @@ end
 # functions for each database; these should have all required hyperparameters
 
 if !isinteractive()
-    if length(ARGS) != 1 || ARGS[1] ∉ ("300K", "10M", "100M")
-        throw(ArgumentError("this script must be called with one of the following arguments: 300K, 10M or 100M"))
+    if length(ARGS) == 0 || any(dbsize -> dbsize ∉ ("300K", "10M", "100M"), ARGS)
+        throw(ArgumentError("this script must be called with a list of the following arguments: 300K, 10M or 100M"))
     end
 
-    task3(dbsize=ARGS[1])
+    for dbsize in ARGS
+        task3(; dbsize)
+    end
 end

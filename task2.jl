@@ -43,12 +43,12 @@ function postprocessing(idx, queries, knns, dists, k, dfile, qfile)
     knns_, dists_
 end
 
-function run_search_task2(idx::SearchGraph, queries::AbstractDatabase, k::Integer, meta, resfile_::String, dfile, qfile)
+function run_search_task2(idx::SearchGraph, queries::AbstractDatabase, k::Integer, kspanlist::Vector, meta, resfile_::String, dfile, qfile)
     resfile_ = replace(resfile_, ".h5" => "")
     params = meta["params"]
 
     # produces result files for different search hyperparametersfor k2 delta < 2f0
-    for kspan in [k, 3k, 10k, 30k]
+    for kspan in kspanlist
         dt = "kspan=$kspan"
         resfile = "$resfile_-$dt.h5"
         @info "searching $resfile"
@@ -67,7 +67,7 @@ function task2(;
         dfile="data2024/laion2B-en-clip768v2-n=$dbsize.h5",
         qfile="data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5",
         k=30,
-        k2=300,
+        kspanlist = [k, 3k], # More realistic kspanlist: [k, 3k, 10k, 30k],
         outdir="results-task2/$dbsize/$(Dates.format(Dates.now(), "yyyymmdd-HHMMSS"))"
     )
 
@@ -85,14 +85,16 @@ function task2(;
     meta["size"] = dbsize
     meta["params"] = "$(meta["params"]) $nick-$nbits"
     resfile = joinpath(outdir, "searchgraph-$nick-k=$k")
-    run_search_task2(G, queries, k, meta, resfile, dfile, qfile)
+    run_search_task2(G, queries, k, kspanlist, meta, resfile, dfile, qfile)
 end
 
 # functions for each database; these should have all required hyperparameters
 if !isinteractive()
-    if length(ARGS) != 1 || ARGS[1] ∉ ("300K", "10M", "100M")
-        throw(ArgumentError("this script must be called with one of the following arguments: 300K, 10M or 100M"))
+    if length(ARGS) == 0 || any(dbsize -> dbsize ∉ ("300K", "10M", "100M"), ARGS)
+        throw(ArgumentError("this script must be called with a list of the following arguments: 300K, 10M or 100M"))
     end
 
-    task2(dbsize=ARGS[1])
+    for dbsize in ARGS
+        task2(; dbsize)
+    end
 end
