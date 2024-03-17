@@ -12,7 +12,7 @@ function evaluate_results(gfile, resultfiles, k)
         end
 
     end
-
+    sort!(res, :recall)
     res
 end
 
@@ -30,7 +30,6 @@ if !isinteractive()
             show(f, "text/plain", D)
             display(gfile => files)
             display(D)
-
             p = lineplot(D.recall; ylim=(0, 1), title=String(D.algo[1]), ylabel="recall", xlabel="$(D.params[1]) ... $(D.params[end])")
             display(p)
             show(f, "text/plain", p)

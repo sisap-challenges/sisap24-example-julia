@@ -4,29 +4,6 @@ include("common.jl")
 
 # This file is based in the julia's example of the 2023 edition
 
-function binperms_model(dist, file::String; nbits::Int=1024, nrefs::Integer=2028)
-    jldopen(file) do f
-        X = f["emb"]
-        m, n = size(X)
-        refs = MatrixDatabase(Matrix{Float32}(X[:, 1:nrefs])) # taking the first 2048 vectors as references
-        fit(BinPerms, dist, refs, nbits)  # 1024 bits
-    end
-end
-
-function predict_h5(model, file::String; nbits::Int=1024, block::Int=10^5)
-    h5open(file) do f
-        X = f["emb"]
-        m, n = size(X)
-        B = Matrix{UInt64}(undef, nbits ÷ 64, n)
-        for group in Iterators.partition(1:n, block)
-            @info "encoding $group of $n -- $(Dates.now())"
-            B[:, group] .= predict(model, MatrixDatabase(X[:, group])).matrix
-        end
-
-        StrideMatrixDatabase(B)
-    end
-end
-
 function postprocessing(idx, queries, knns, dists, k, dfile, qfile)
     m, n = size(knns)
     dist = NormalizedCosineDistance()
@@ -96,18 +73,18 @@ function task2(;
 
     mkpath(outdir) 
     dist = NormalizedCosineDistance()  # 1 - dot(·, ·)
-    nbits = 8 * 4 * 72 # same than 72 FP32 
-    model = binperms_model(dist, dfile; nbits)
-    db = predict_h5(model, dfile; nbits)
-    queries = predict_h5(model, qfile; nbits)
-    distH = BinaryHammingDistance()
+    nbits = 8 * 4 * 96 # same than 96 FP32 
+    preprocessingtime = @elapsed model, dist_proj, nick = create_pca_model(dist, dfile; nbits)
+    preprocessingtime += @elapsed db = predict_h5(model, dfile; nbits)
+    preprocessingtime += @elapsed queries = predict_h5(model, qfile; nbits)
 
     # loading or computing knns
     @info "indexing, this can take a while!"
-    G, meta = build_searchgraph(distH, db)
+    G, meta = build_searchgraph(dist_proj, db)
+    meta["preprocessingtime"] = preprocessingtime
     meta["size"] = dbsize
-    meta["params"] = "$(meta["params"]) binperms-$nbits"
-    resfile = joinpath(outdir, "searchgraph-binperms-nbits=$nbits-k=$k")
+    meta["params"] = "$(meta["params"]) $nick-$nbits"
+    resfile = joinpath(outdir, "searchgraph-$nick-k=$k")
     run_search_task2(G, queries, k, meta, resfile, dfile, qfile)
 end
 

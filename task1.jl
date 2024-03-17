@@ -68,7 +68,7 @@ function task1(;
     # loading or computing knns
     @info "indexing, this can take a while!"
     G, meta = build_searchgraph(dist, db)
-
+    meta["preprocessingtime"] = 0.0
     meta["size"] = dbsize
     resfile = joinpath(outdir, "searchgraph-k=$k")
     run_search_task1(G, queries, k, meta, resfile)
