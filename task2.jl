@@ -74,14 +74,16 @@ function task2(;
     mkpath(outdir) 
     dist = NormalizedCosineDistance()  # 1 - dot(·, ·)
     nbits = 8 * 4 * 96 # same than 96 FP32 
-    preprocessingtime = @elapsed model, dist_proj, nick = create_pca_model(dist, dfile; nbits)
-    preprocessingtime += @elapsed db = predict_h5(model, dfile; nbits)
-    preprocessingtime += @elapsed queries = predict_h5(model, qfile; nbits)
+    modelingtime = @elapsed model, dist_proj, nick = create_pca_model(dist, dfile; nbits)
+    encdatabasetime = @elapsed db = predict_h5(model, dfile; nbits)
+    encqueriestime = @elapsed queries = predict_h5(model, qfile; nbits)
 
     # loading or computing knns
     @info "indexing, this can take a while!"
     G, meta = build_searchgraph(dist_proj, db)
-    meta["preprocessingtime"] = preprocessingtime
+    meta["modelingtime"] = modelingtime
+    meta["encdatabasetime"] = encdatabasetime
+    meta["encqueriestime"] = encqueriestime
     meta["size"] = dbsize
     meta["params"] = "$(meta["params"]) $nick-$nbits"
     resfile = joinpath(outdir, "searchgraph-$nick-k=$k")

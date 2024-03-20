@@ -14,9 +14,8 @@ Similarity search on neighbor's graphs with automatic Pareto optimal performance
 ES Tellez, G Ruiz - arXiv preprint arXiv:2201.07917, 2022
 ```
 """
-function build_searchgraph(dist::SemiMetric, db::AbstractDatabase; minrecall=0.9)
+function build_searchgraph(dist::SemiMetric, db::AbstractDatabase; minrecall=0.95, logbase=2.0)
     algo = "SearchGraph"
-    logbase = 2
     ctx = SearchGraphContext(;
                              hyperparameters_callback = OptimizeParameters(MinRecall(minrecall)),
                              neighborhood = Neighborhood(; logbase),
@@ -54,7 +53,9 @@ function save_results(knns::Matrix, dists::Matrix, meta, resfile::AbstractString
         algo=meta["algo"],
         buildtime=meta["buildtime"] + meta["optimtime"],
         querytime=meta["querytime"],
-        preprocessingtime=meta["preprocessingtime"],
+        modelingtime=get(meta, "modelingtime", 0.0),
+        encdatabasetime=get(meta, "encdatabasetime", 0.0),
+        encqueriestime=get(meta, "encqueriestime", 0.0),
         params=meta["params"],
         size=meta["size"]
     )
@@ -98,6 +99,20 @@ function create_binperms_model(dist, file::String; nbits::Int, nrefs::Int=2048)
     fit(BinPerms, dist, refs, nbits), BinaryHammingDistance(), "BinPerms-$nbits"
 end
 
+function create_heh_model(dist, file::String; nbits::Int)
+    A = h5open(file) do f
+        X = f["emb"]
+        m, n = size(X)
+        n2 = 2^15
+        X[:, 1:n2]
+    end
+
+    @show size(A) typeof(A)
+    #fit(highentropyhyperplanes, dist, matrixdatabase(a), nbits; sample_for_hyperplane_selection=2^16, k=4092, k2=1024), binaryhammingdistance(), "highentropyhyperplanes-$nbits"
+    fit(HighEntropyHyperplanes, dist, MatrixDatabase(A), nbits; minent=0.5,
+        sample_for_hyperplane_selection=2^13), BinaryHammingDistance(), "HighEntropyHyperplanes-$nbits"
+end
+
 
 function predict_h5(model::Union{PCAProjection,GaussianRandomProjection}, file::String; nbits, block::Int=10^5)
     dim = nbits ÷ 32
@@ -114,7 +129,7 @@ function predict_h5(model::Union{PCAProjection,GaussianRandomProjection}, file::
     end
 end
 
-function predict_h5(model::BinPerms, file::String; nbits, block::Int=10^5)
+function predict_h5(model::Union{BinPerms,HighEntropyHyperplanes}, file::String; nbits, block::Int=10^5)
     h5open(file) do f
         X = f["emb"]
         m, n = size(X)

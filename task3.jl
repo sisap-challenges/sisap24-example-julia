@@ -35,18 +35,22 @@ function task3(;
 
     mkpath(outdir) 
     dist = NormalizedCosineDistance()  # 1 - dot(·, ·)
+    #nbits = 8 * 4 * 128  # memory eq to 128 fp32 
     nbits = 8 * 4 * 128  # memory eq to 128 fp32 
     #model, dist_proj, nick = create_binperms_model(dist, dfile; nbits)
     #model, dist_proj, nick = create_rp_model(dist, dfile; nbits)
-    preprocessingtime = @elapsed model, dist_proj, nick = create_pca_model(dist, dfile; nbits)
-    preprocessingtime += @elapsed db = predict_h5(model, dfile; nbits)
-    preprocessingtime += @elapsed queries = predict_h5(model, qfile; nbits)
+    modelingtime = @elapsed model, dist_proj, nick = create_pca_model(dist, dfile; nbits)
+    #modelingtime = @elapsed model, dist_proj, nick = create_heh_model(dist, dfile; nbits)
+    encdatabasetime = @elapsed db = predict_h5(model, dfile; nbits)
+    encqueriestime = @elapsed queries = predict_h5(model, qfile; nbits)
 
     # loading or computing knns
     @info "indexing, this can take a while!"
     G, meta = build_searchgraph(dist_proj, db)
     meta["size"] = dbsize
-    meta["preprocessingtime"] = preprocessingtime
+    meta["modelingtime"] = modelingtime
+    meta["encdatabasetime"] = encdatabasetime
+    meta["encqueriestime"] = encqueriestime
     meta["params"] = "$(meta["params"]) $nick"
     resfile = joinpath(outdir, "searchgraph-$nick-k=$k")
     run_search_task3(G, queries, k, meta, resfile)
