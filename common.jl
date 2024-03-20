@@ -82,36 +82,6 @@ function create_pca_model(dist, file::String; nbits::Int)
     fit(PCAProjection, A, dim), SqL2Distance(), "PCA-$(dim)"
 end
 
-function create_binperms_model(dist, file::String; nbits::Int, nrefs::Int=2048)
-    A = h5open(file) do f
-        X = f["emb"]
-        m, n = size(X)
-        n2 = min(10^6, n ÷ 3)
-        X[:, 1:n2]
-    end
-
-    @show size(A) typeof(A)
-    refs = let
-        C = fft(dist, MatrixDatabase(A), nrefs) # select `nrefs` distant elements -- kcenters using farthest first traversal
-        MatrixDatabase(A[:, C.centers])
-    end
-
-    fit(BinPerms, dist, refs, nbits), BinaryHammingDistance(), "BinPerms-$nbits"
-end
-
-function create_heh_model(dist, file::String; nbits::Int)
-    A = h5open(file) do f
-        X = f["emb"]
-        m, n = size(X)
-        n2 = 2^15
-        X[:, 1:n2]
-    end
-
-    @show size(A) typeof(A)
-    #fit(highentropyhyperplanes, dist, matrixdatabase(a), nbits; sample_for_hyperplane_selection=2^16, k=4092, k2=1024), binaryhammingdistance(), "highentropyhyperplanes-$nbits"
-    fit(HighEntropyHyperplanes, dist, MatrixDatabase(A), nbits; minent=0.5,
-        sample_for_hyperplane_selection=2^13), BinaryHammingDistance(), "HighEntropyHyperplanes-$nbits"
-end
 
 
 function predict_h5(model::Union{PCAProjection,GaussianRandomProjection}, file::String; nbits, block::Int=10^5)
@@ -120,20 +90,6 @@ function predict_h5(model::Union{PCAProjection,GaussianRandomProjection}, file::
         X = f["emb"]
         m, n = size(X)
         B = Matrix{Float32}(undef, dim, n)
-        for group in Iterators.partition(1:n, block)
-            @info "encoding $group of $n -- $(Dates.now())"
-            B[:, group] .= predict(model, MatrixDatabase(X[:, group])).matrix
-        end
-
-        StrideMatrixDatabase(B)
-    end
-end
-
-function predict_h5(model::Union{BinPerms,HighEntropyHyperplanes}, file::String; nbits, block::Int=10^5)
-    h5open(file) do f
-        X = f["emb"]
-        m, n = size(X)
-        B = Matrix{UInt64}(undef, nbits ÷ 64, n)
         for group in Iterators.partition(1:n, block)
             @info "encoding $group of $n -- $(Dates.now())"
             B[:, group] .= predict(model, MatrixDatabase(X[:, group])).matrix

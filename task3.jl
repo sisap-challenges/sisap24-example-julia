@@ -35,12 +35,9 @@ function task3(;
 
     mkpath(outdir) 
     dist = NormalizedCosineDistance()  # 1 - dot(·, ·)
-    #nbits = 8 * 4 * 128  # memory eq to 128 fp32 
     nbits = 8 * 4 * 128  # memory eq to 128 fp32 
-    #model, dist_proj, nick = create_binperms_model(dist, dfile; nbits)
     #model, dist_proj, nick = create_rp_model(dist, dfile; nbits)
     modelingtime = @elapsed model, dist_proj, nick = create_pca_model(dist, dfile; nbits)
-    #modelingtime = @elapsed model, dist_proj, nick = create_heh_model(dist, dfile; nbits)
     encdatabasetime = @elapsed db = predict_h5(model, dfile; nbits)
     encqueriestime = @elapsed queries = predict_h5(model, qfile; nbits)
 

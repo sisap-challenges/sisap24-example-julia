@@ -22,7 +22,6 @@ function evaluate_results(gfile, resultfiles, k)
 end
 
 function print_results(f, D, gfile, files, task, dbsize)
-    println(f, gfile => files)
     show(f, "text/plain", gfile => files); println(f)
     show(f, "text/plain", D); println(f)
     p = lineplot(D.recall; ylim=(0, 1), title=String(D.algo[1]), ylabel="recall", xlabel="$(D.params[1]) to $(D.params[end])")
