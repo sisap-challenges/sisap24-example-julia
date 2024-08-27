@@ -53,7 +53,8 @@ Runs an entire beenchmark
 function task1(;
         dbsize,
         dfile="data2024/laion2B-en-clip768v2-n=$dbsize.h5",
-        qfile="data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5",
+        #qfile="data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5",
+        qfile="data2024/private-queries-2024-laion2B-en-clip768v2-n=10k-epsilon=0.2.h5",
         k=30,
         outdir="results-task1/$dbsize/$(Dates.format(Dates.now(), "yyyymmdd-HHMMSS"))"
     )
@@ -67,7 +68,7 @@ function task1(;
     
     # loading or computing knns
     @info "indexing, this can take a while!"
-    G, meta = build_searchgraph(dist, db)
+    G, meta = build_searchgraph(dist, db; logbase=1.2)
     meta["size"] = dbsize
     resfile = joinpath(outdir, "searchgraph-k=$k")
     run_search_task1(G, queries, k, meta, resfile)

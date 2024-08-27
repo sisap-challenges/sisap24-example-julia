@@ -28,7 +28,7 @@ end
 function task3(;
         dbsize,
         dfile="data2024/laion2B-en-clip768v2-n=$dbsize.h5",
-        qfile="data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5",
+        qfile="data2024/private-queries-2024-laion2B-en-clip768v2-n=10k-epsilon=0.2.h5",
         k=30,
         outdir="results-task3/$dbsize/$(Dates.format(Dates.now(), "yyyymmdd-HHMMSS"))"
     )
@@ -44,6 +44,7 @@ function task3(;
     # loading or computing knns
     @info "indexing, this can take a while!"
     G, meta = build_searchgraph(dist_proj, db)
+    # saveindex("index.task3.nbits=$nbits.jld2", G; meta=(; nbits, modelingtime, encdatabasetime, encqueriestime), store_db=false)
     meta["size"] = dbsize
     meta["modelingtime"] = modelingtime
     meta["encdatabasetime"] = encdatabasetime

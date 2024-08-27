@@ -29,7 +29,7 @@ function print_results(f, D, gfile, files, task, dbsize)
 end
 
 if !isinteractive()
-    goldsuffix = "public-queries-2024-laion2B-en-clip768v2-n=10k.h5"
+    goldsuffix = "private-queries-2024-laion2B-en-clip768v2-n=10k.h5"
     k = 30
     if length(ARGS) == 0
         open("results-summary.txt", "w") do f
@@ -54,6 +54,7 @@ if !isinteractive()
             D = evaluate_results(gfile, files, k)
             println("\n\n=== results for $dbsize $goldsuffix ===")
             print_results(stdout, D, gfile, files, task, dbsize)
+            CSV.write(task * "-$dbsize-private-gold.csv", D)
         end
     end
     

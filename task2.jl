@@ -65,9 +65,10 @@ end
 function task2(;
         dbsize,
         dfile="data2024/laion2B-en-clip768v2-n=$dbsize.h5",
-        qfile="data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5",
+        #qfile="data2024/public-queries-2024-laion2B-en-clip768v2-n=10k.h5",
+        qfile="data2024/private-queries-2024-laion2B-en-clip768v2-n=10k-epsilon=0.2.h5",
         k=30,
-        kspanlist = [k, 3k], # More realistic kspanlist: [k, 3k, 10k, 30k],
+        kspanlist = [k, 3k, 10k, 30k], # More realistic kspanlist: [k, 3k, 10k, 30k],
         outdir="results-task2/$dbsize/$(Dates.format(Dates.now(), "yyyymmdd-HHMMSS"))"
     )
 
