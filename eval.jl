@@ -29,7 +29,7 @@ function print_results(f, D, gfile, files, task, dbsize)
 end
 
 if !isinteractive()
-    goldsuffix = "private-queries-2024-laion2B-en-clip768v2-n=10k.h5"
+    goldsuffix = "private-queries-2024-laion2B-en-clip768v2-n=10k-epsilon=0.2.h5"
     k = 30
     if length(ARGS) == 0
         open("results-summary.txt", "w") do f
